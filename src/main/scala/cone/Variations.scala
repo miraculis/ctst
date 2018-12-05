@@ -14,101 +14,96 @@ object Rec {
     new Rec(nums(0), nums(1), nums(2), nums(3))
   }
 }
+
 object Variations {
+  type P = Array[Rec]
+
   def main(a:Array[String]) = {
     val data = read(a(0))
-    write(permutate(data, data.length))
+    permutate(data, data.length, printOut)
   }
 
-  def permutate(data: List[Rec], n: Int): List[List[Rec]] = {
-    n match {
-      case 1 => List(data)
-      case _ =>
-        val p = permutate(data.tail, n-1)
-        if (p.isEmpty) p
-        else upgrade(data.head, p).filter(check)
+  def permutate(data: P, n: Int, c : P => Unit): Unit = {
+    if (check(data, n)) {
+      if (n == 1) {
+        c(data)
+      } else {
+        for (i <- n - 1 to 0 by -1) {
+          swap(data, i, n - 1)
+          permutate(data, n - 1, c)
+          swap(data, i, n - 1)
+        }
+      }
     }
   }
 
-  def upgrade(x: Rec, cur: List[List[Rec]]) : List[List[Rec]] = {
-      for {list <- cur
-           pos <- 0 to list.length} yield insert(x, list, pos)
+  def swap(d:P, i:Int, j:Int): Unit = {
+    val swap = d(j)
+    d(j) = d(i)
+    d(i) = swap
   }
 
-  def insert(x: Rec, list: List[Rec], pos: Int): List[Rec] = {
-    list.slice(0, pos) ::: (x :: list.slice(pos, list.length))
-  }
-
-  def check(p: List[Rec]) : Boolean = {
-    p.length match {
-      case 2 => check2(p, 0)
-      case 4 => check4(p, 0)
-      case 5 => check5(p, 0)
-      case 6 => check6(p, 0)
-      case 7 => check7(p, 0)
-      case 8 => check8(p, 0)
-      case 9 => check9(p, 0)
-      case 10 => check10(p, 0)
-      case 11 => check11(p, 0)
-      case 12 => check12(p, 0)
+  def check(xs:P, n :Int) : Boolean = {
+    n match {
+      case 10 => check10(xs)
+      case 8 => check8(xs)
+      case 7 => check7(xs)
+      case 6 => check6(xs)
+      case 5 => check5(xs)
+      case 4 => check4(xs)
+      case 3 => check3(xs)
+      case 2 => check2(xs)
+      case 1 => check1(xs)
       case _ => true
     }
   }
 
-  def check2(p:List[Rec], s:Int):Boolean = {
-    p(s).dr + p(s + 1).dl < 10
+  def check10(xs:P):Boolean = {
+    xs(10).dr + xs(11).dl <= 10
   }
 
-  def check4(p:List[Rec], s:Int):Boolean = {
-    check2(p, s + 2) && p(s).dr + p(s + 1).dl + p(s + 3).ur < 10
+  def check8(xs:P):Boolean = {
+    xs(8).dr + xs(9).dl + xs(11).ur <= 10
   }
 
-  def check5(p:List[Rec], s:Int):Boolean = {
-    check4(p, s + 1) && p(s).dr + p(s + 1).dl + p(s + 3).ur + p(s + 4).ul == 10
+  def check7(xs:P):Boolean = {
+    xs(7).dr + xs(8).dl + xs(10).ur + xs(11).ul == 10
   }
 
-  def check6(p:List[Rec], s:Int):Boolean = {
-    check5(p, s + 1) && p(s).dr + p(s + 1).dl + p(s + 4).ur < 10
+  def check6(xs:P):Boolean = {
+    xs(6).dr + xs(7).dl + xs(10).ul <= 10
   }
 
-  def check7(p:List[Rec], s:Int):Boolean = {
-    check6(p, s + 1) && p(s).dr + p(s + 4).ur < 10
+  def check5(xs:P):Boolean = {
+    xs(5).dr + xs(9).ur <= 10
   }
 
-  def check8(p:List[Rec], s: Int):Boolean = {
-    check7(p, s + 1) && p(s).dr + p(s + 1).dl + p(s + 4).ur + p(s + 5).ul == 10
+  def check4(xs:P):Boolean = {
+    xs(4).dr + xs(5).dl + xs(8).ur + xs(9).ul == 10
   }
 
-  def check9(p:List[Rec], s:Int):Boolean = {
-    check8(p, s + 1) && p(s).dr + p(s + 1).dl + p(s + 4).ur + p(s + 5).ul == 10
+  def check3(xs:P):Boolean = {
+    xs(3).dr + xs(4).dl + xs(7).ur + xs(8).ul == 10
   }
 
-  def check10(p:List[Rec], s:Int):Boolean = {
-    check9(p, s + 1) && p(s).dr + p(s + 1).dl + p(s + 4).ur + p(s + 5).ul == 10 && p(s).dl + p(s + 4).ul < 10
+  def check2(xs:P):Boolean = {
+    xs(2).dr + xs(3).dl + xs(6).ur + xs(7).ul == 10 &&
+      xs(2).dl + xs(6).ul <= 10
   }
 
-  def check11(p:List[Rec], s:Int):Boolean = {
-    check10(p, s + 1) && p(s).dr + p(s + 3).ur + p(s + 4).ul < 10
+  def check1(xs:P):Boolean = {
+    xs(0).dl + xs(2).ur + xs(3).ul <= 10 &&
+    xs(0).ur + xs(1).ul <= 10 &&
+    xs(0).dr + xs(1).dl + xs(3).ur + xs(4).ul == 10 &&
+    xs(1).dr + xs(4).ur + xs(5).ul <= 10
   }
 
-  def check12(p:List[Rec], s:Int):Boolean = {
-    check11(p, s + 1) && p(s).ur + p(s + 1).ul < 10 &&
-    p(s).dr + p(s + 1).dl + p(s + 3).ur + p(s + 4).ul == 10 &&
-    p(s).dl + p(s + 2).ur + p(s + 3).ul < 10
+  def read(filename:String) : Array[Rec] = {
+    Source.fromFile(filename).getLines.collect{case line: String => Rec.fromLine(line)}.toArray
   }
 
-  def read(filename:String) : List[Rec] = {
-    Source.fromFile(filename).getLines.collect{case line: String => Rec.fromLine(line)}.toList
+  def printOut(x:P) = {
+    x.foreach(println(_))
+    println()
   }
-
-  def write(data: List[List[Rec]]) = {
-    data match {
-      case _ :: _ =>
-        data.foreach(x => {
-          x.foreach(println(_))
-          println
-        })
-      case Nil => println("No solution")
-    }
-   }
 }
